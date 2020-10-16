@@ -22,6 +22,7 @@ namespace Cadastro.model
             this.Bairro = bairro;
             this.Cidade = cidade;
             this.Estado = estado;
+
         }
 
 
