@@ -1,152 +1,110 @@
 ﻿using Cadastro.model;
 using System;
 using System.Data;
-using System.Data.OleDb;
+using MySql.Data;
+using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Cms;
 
 namespace Cadastro.Dao
 {
     class PessoaDao
     {
+        private Service.connectiondb connectiondb;
+        private MySqlConnection connection;
 
-        public OleDbConnection obterConexao()
+
+        public void Exclua(long cpf)
         {
-            OleDbConnection conn = null;
 
-            string connectionString = "Server = localhost; Database = cadastro; Uid = root; Pwd = ";
-
-            conn = new OleDbConnection(connectionString);
-
-            if (conn.State == ConnectionState.Closed)
+            connection = new MySqlConnection();
+            connectiondb = new Service.connectiondb();
+            connection.ConnectionString = connectiondb.getConnectionString();
+            var query = "DELETE FROM nome_tabela WHERE cpf = ?cpf";
+            try
             {
-                conn.Open();
+                connection.Open();
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("?cpf", cpf);
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
             }
-            return conn;
+            finally
+            {
+                connection.Close();
+            }
         }
 
-        public void fecharConexao(OleDbConnection conn)
+        public void Insira(string nome, long cpf, Endereco endereco, Telefone telefones)
         {
-            if (conn.State == ConnectionState.Open)
-            {
-                conn.Close();
-            }
-        }
-
-        public bool Exclua(long cpf)
-        {
-            string query = "DELETE FROM nome_table WHERE p = '" + cpf + "'";
-            OleDbDataReader dataReader = null;
-            OleDbConnection dbConnection = null;
+            connection = new MySqlConnection();
+            connectiondb = new Service.connectiondb();
+            connection.ConnectionString = connectiondb.getConnectionString();
+            var query = "INSERT INTO nome_tabela(nome, cpf, endereco, telefones) VALUES (?nome, ?cpf, ?endereco, ?telefones)";
 
             try
             {
-                dbConnection = obterConexao();
-
-                OleDbCommand dbCommand = new OleDbCommand(query, dbConnection);
-
-                dataReader = dbCommand.ExecuteReader();
-
-                while (dataReader.Read())
-                {
-                    return true;
-                }
-
-                fecharConexao(dbConnection);
+                connection.Open();
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("?nome", nome);
+                cmd.Parameters.AddWithValue("?cpf", cpf);
+                cmd.Parameters.AddWithValue("?endereco", endereco);
+                cmd.Parameters.AddWithValue("?telefones", telefones);
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
             }
-            catch (Exception e)
+            finally 
             {
-                throw e;
+                connection.Close();
             }
-            return true;
-
-
-        }
-
-        public bool Insira(string nome, long cpf, Endereco endereco, Telefone telefones)
-        {
-            string query = "INSERT INTO nome_tabela(nome, cpf, endereco, telefones) VALUES ('" + nome + "', '" + endereco + "', '" + cpf + "', '" + telefones + "')";
-            OleDbDataReader dataReader = null;
-            OleDbConnection dbConnection = null;
-
-            try
-            {
-                dbConnection = obterConexao();
-
-                OleDbCommand dbCommand = new OleDbCommand(query, dbConnection);
-
-                dataReader = dbCommand.ExecuteReader();
-
-                while (dataReader.Read())
-                {
-                    return true;
-                }
-
-                fecharConexao(dbConnection);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-            return true;
+            
         }
 
 
-        public bool Altera(string nome, long cpf, Endereco endereco, Telefone telefones)
+        public void Altera(string nome, long cpf, Endereco endereco, Telefone telefones)
         {
-            string query = "UPDATE nome_tabela SET nome = " + nome + ", endereco = " + endereco + ", telefones = " + telefones + " WHERE cpf =  '" + cpf + "'";
-            OleDbDataReader dataReader = null;
-            OleDbConnection dbConnection = null;
+            connection = new MySqlConnection();
+            connectiondb = new Service.connectiondb();
+            connection.ConnectionString = connectiondb.getConnectionString();
+            string query = "UPDATE nome_tabela SET nome = ?nome, endereco = ?endereco, telefone = ?telefones WHERE cpf = ?cpf";
+
             try
             {
-                dbConnection = obterConexao();
-
-                OleDbCommand dbCommand = new OleDbCommand(query, dbConnection);
-
-                dataReader = dbCommand.ExecuteReader();
-
-                while (dataReader.Read())
-                {
-                    return true;
-                }
-
-                fecharConexao(dbConnection);
+                connection.Open();
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("?nome", nome);
+                cmd.Parameters.AddWithValue("?cpf", cpf);
+                cmd.Parameters.AddWithValue("?endereco", endereco);
+                cmd.Parameters.AddWithValue("?telefones", telefones);
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
             }
-            catch (Exception e)
+            finally
             {
-                throw e;
+                connection.Close();
             }
-            return true;
 
         }
 
 
-        public bool Consulte(long cpf)
+        public void Consulte(long cpf)
         {
-            string query = "SELECT * FROM nome_tabela WHERE cpf = '" + cpf + "'";
-            OleDbDataReader dataReader = null;
-            OleDbConnection dbConnection = null;
+            connection = new MySqlConnection();
+            connectiondb = new Service.connectiondb();
+            connection.ConnectionString = connectiondb.getConnectionString();
+            string query = "SELECT * FROM nome_tabela WHERE cpf = ?cpf";
+
             try
             {
-                dbConnection = obterConexao();
-
-                OleDbCommand dbCommand = new OleDbCommand(query, dbConnection);
-
-                dataReader = dbCommand.ExecuteReader();
-                if (dataReader.HasRows)
-                {
-                    while (dataReader.Read())
-                    {
-                        return true;
-                    }
-                }
-
-                dataReader.Close();
-                fecharConexao(dbConnection);
+                connection.Open();
+                MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("?cpf", cpf);
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
             }
-            catch (Exception e)
+            finally
             {
-                throw e;
+                connection.Close();
             }
-            return true;
 
         }
 
